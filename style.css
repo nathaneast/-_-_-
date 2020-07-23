@@ -1,0 +1,23 @@
+.calender-days {
+  display: flex;
+}
+
+/* .calender-weeks {
+  width: 350px;
+  height: 300px;
+} */
+
+.calender-days {
+  display: grid;
+  grid-template-columns: repeat(7, 100px);
+  grid-template-rows: repeat(1, 70px);
+}
+
+.calender-dates {
+  display: grid;
+  grid-template-columns: repeat(7, 100px);
+  grid-template-rows: repeat(5, minmax(70px, auto));
+}
+
+
+
