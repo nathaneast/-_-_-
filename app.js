@@ -2,8 +2,31 @@ const dates = document.querySelector('.calender-dates');
 const currMonth = document.querySelector('.currMonth');
 const backMonthBtn = document.querySelector('.backMonthBtn');
 const nextMonthBtn = document.querySelector('.nextMonthBtn');
+const addUserBtn = document.querySelector('.addUserBtn');
+const modal = document.querySelector('.modal');
+const modalMessage = document.querySelector('.modal-message');
+const modalBtns = document.querySelector('.modal-buttons');
 
 function init() {
+  const modals = {
+    openModal: () => {
+      modal.classList.remove('hidden');
+    },
+    addUser: () => {
+      modals.openModal();
+  
+      const addBtn = document.createElement('button');
+      const closeBtn = document.createElement('button');
+      
+      modalMessage.innerText = '샘을 추가 하시겠어요 ?'
+
+      addBtn.innerText = '추가';
+      closeBtn.innerText = '닫기';
+      modalBtns.appendChild(addBtn);
+      modalBtns.appendChild(closeBtn);
+
+    }
+  } 
   let currDate = new Date();
 
   function viewCurrMonth() {
@@ -62,5 +85,6 @@ function init() {
 
   backMonthBtn.addEventListener('click', monthHandler);
   nextMonthBtn.addEventListener('click', monthHandler);
+  addUserBtn.addEventListener('click', modals.addUser);
 }
 init();
