@@ -5,7 +5,10 @@ const nextMonthBtn = document.querySelector('.nextMonthBtn');
 const addUserBtn = document.querySelector('.addUserBtn');
 
 const modal = document.querySelector('.modal');
+const modalOverlay = document.querySelector('.modal-overlay');
 const modalContent = document.querySelector('.modal-content');
+
+const userList = document.querySelector('.userList');
 
 function init() {
   let currDate = new Date();
@@ -30,6 +33,12 @@ function init() {
 
     function openModal() {
       modal.classList.remove('hidden');
+      modalOverlay.addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) {
+          resetContent();
+          modal.classList.add('hidden');
+        }
+      });
     }
 
     // 첫번째 자식 div만 지우면 되지만 두번 눌러야 동작해서 while처리 추후 리팩토링
@@ -39,25 +48,9 @@ function init() {
       }
     }
 
-    function addUser() {
-      openModal();
-      modalInitMarkup();
-
-      const addUserMessage = document.createElement('h3');
-      const userInputName = document.createElement('input');
-      const addBtn = document.createElement('button');
-      const closeBtn = document.createElement('button');
-      userInputName.classList.add('userInputName');
-
-      document.querySelector('.message').appendChild(addUserMessage);
-      document.querySelector('.userInput').appendChild(userInputName);
-      document.querySelector('.btns').appendChild(addBtn);
-      document.querySelector('.btns').appendChild(closeBtn);
-      
-      addUserMessage.innerText = '이름을 입력 해주세요';
-      addBtn.innerText = '추가';
-      closeBtn.innerText = '닫기';
-      addBtn.addEventListener('click', addUserCheck);
+    function closeModal() {
+      modal.classList.add('hidden');
+      resetContent();
     }
 
     function inputUserNameWarning() {
@@ -79,17 +72,55 @@ function init() {
         resetContent();
         addUser();
       });
+      closeBtn.addEventListener('click', () => {
+        resetContent();
+        closeModal();
+      });
+    }
+
+    function userListUp() {
+      const newUser = document.createElement('div');
+      const newUserName = document.createElement('span');
+
+      newUserName.innerText = document.querySelector('.userInputName').value;
+      userList.appendChild(newUser);
+      newUser.appendChild(newUserName);
+      closeModal();
     }
 
     function addUserCheck() {
-      const userNameLength =  document.querySelector('.userInputName').value.length;
+      const userNameLength = document.querySelector('.userInputName').value.length;
       if (userNameLength === 0 || userNameLength > 5) {
-        console.log(userNameLength);
         resetContent();
         inputUserNameWarning();
+      } else {
+        userListUp();
       }
     }
+
+    function addUser() {
+      openModal();
+      modalInitMarkup();
+
+      const addUserMessage = document.createElement('h3');
+      const userInputName = document.createElement('input');
+      const addBtn = document.createElement('button');
+      const closeBtn = document.createElement('button');
+      userInputName.classList.add('userInputName');
+
+      document.querySelector('.message').appendChild(addUserMessage);
+      document.querySelector('.userInput').appendChild(userInputName);
+      document.querySelector('.btns').appendChild(addBtn);
+      document.querySelector('.btns').appendChild(closeBtn);
+
+      addUserMessage.innerText = '이름을 입력 해주세요';
+      addBtn.innerText = '추가';
+      closeBtn.innerText = '닫기';
+      addBtn.addEventListener('click', addUserCheck);
+      closeBtn.addEventListener('click', closeModal);
+    }
     addUser();
+
   }
 
   function viewCurrMonth() {
