@@ -4,10 +4,10 @@
   grid-template-rows: repeat(1, 70px);
 }
 
-.calender-dates {
+.currMonth-dates {
   display: grid;
   grid-template-columns: repeat(7, 100px);
-  grid-template-rows: repeat(5, minmax(70px, auto));
+  grid-template-rows: repeat(6, minmax(70px, auto));
 }
 
 .modal {
@@ -44,4 +44,8 @@
 
 .hidden {
   display: none;
+}
+
+.selectedUser {
+  color: red;
 }

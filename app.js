@@ -29,22 +29,27 @@ function init() {
       currContent.appendChild(btns);
       modalContent.appendChild(currContent);
     },
+    resetContent: () => {
+      while (modalContent.firstChild) {
+        modalContent.firstChild.remove();
+      }
+    },
     openModal: () => {
       modal.classList.remove('hidden');
       modalOverlay.addEventListener('click', (e) => {
         if (e.target === e.currentTarget) {
-          calenderProcess.resetContent();
+          modalsProcess.resetContent();
           modal.classList.add('hidden');
         }
       });
     },
     closeModal: () => {
       modal.classList.add('hidden');
-      calenderProcess.resetContent();
+      modalsProcess.resetContent();
     },
     warningMessage: {
       userCount: () => {
-        calenderProcess.resetContent();
+        modalsProcess.resetContent();
         modalsProcess.initMarkup();
 
         const warningMessage = document.createElement('h3');
@@ -60,7 +65,7 @@ function init() {
         closeBtn.addEventListener('click', modalsProcess.closeModal);
       },
       userName: () => {
-        calenderProcess.resetContent();
+        modalsProcess.resetContent();
         modalsProcess.initMarkup();
 
         const warningMessage = document.createElement('h3');
@@ -76,11 +81,11 @@ function init() {
         closeBtn.innerText = '닫기';
 
         returnAddUserBtn.addEventListener('click', () => {
-          calenderProcess.resetContent();
+          modalsProcess.resetContent();
           userProcess.addUser();
         });
         closeBtn.addEventListener('click', () => {
-          calenderProcess.resetContent();
+          modalsProcess.resetContent();
           modalsProcess.closeModal();
         });
       }
@@ -88,6 +93,63 @@ function init() {
   }
 
   const userProcess = {
+    selectDayOf: user => {
+      const currMonthDates = document.querySelector('.currMonth-dates');
+      const selecteUserName = user.currentTarget.firstChild.innerHTML;
+      const hasSelectedUser = user.currentTarget.classList.toggle('selectedUser');
+
+      if (hasSelectedUser) {
+        currMonthDates.addEventListener('click', e => {
+          const hasEmptyDate = !e.target.classList.contains('emptyDate');
+          const hasCurrMonthDates = !e.target.classList.contains('currMonth-dates');
+          const dayOfUser = document.createElement('div');
+          const dayOfUserName = document.createElement('span');
+          dayOfUser.classList.add(selecteUserName);
+
+          dayOfUserName.innerText = selecteUserName;
+
+          if (hasEmptyDate && hasCurrMonthDates) {
+            getElementsByClassName
+
+            if (e.target.classList.contains('date-number')) {
+              e.target.parentNode.appendChild(dayOfUser);
+              dayOfUser.appendChild(dayOfUserName);
+            } else {
+              e.target.appendChild(dayOfUser);
+              dayOfUser.appendChild(dayOfUserName);
+            }
+          }
+        });
+      } else {
+        // 선택된 유저 또 누르면 이벤트 제거 되야함
+
+
+        // document.querySelector('.currMonth-dates').removeEventListener('click', e => {
+        //   if(!e.target.classList.contains('emptyDate')) {
+        //     console.log(e.target);
+        //   }
+        // });
+      };
+    },
+    datesOnEvent: user => {
+      const currDates = document.querySelector('.currMonth-dates').childNodes;
+      for (let i = 0; i <= currDates.length; i++) {
+        if (!currDates[i].classList.contains('emptyDate')) {
+          currDates[i].addEventListener('click', )
+          //유저인자 받아야 유저 이름 알 수 있음 굳이 ? 
+        }
+      }
+
+      // const selecteUser = user.currentTarget.firstChild.innerHTML;
+      // const dates = document.querySelector('.currMonth-dates').childNodes;
+
+      // });
+    },
+    selecteUser: user => {
+      user.currentTarget.classList('selectedUser');
+      const a = user.currentTarget.firstChild.innerHTML;
+      console.log(a)
+    },
     userListUp: () => {
       const newUser = document.createElement('div');
       const newUserName = document.createElement('span');
@@ -96,7 +158,10 @@ function init() {
       userList.appendChild(newUser);
       newUser.appendChild(newUserName);
 
-      // newUser.addEventListener('click', selectDayOf);
+      newUser.addEventListener('click', e => {
+        userProcess.selecteUser(e);
+        // userProcess.datesOnEvent();
+      });
       modalsProcess.closeModal();
     },
     addUserCheck: () => {
@@ -135,15 +200,10 @@ function init() {
 
   const calenderProcess = {
     // 첫번째 자식 div만 지우면 되지만 두번 눌러야 동작해서 while처리 추후 리팩토링
-    resetContent: () => {
-      while (modalContent.firstChild) {
-        modalContent.firstChild.remove();
-      }
-    },
     viewCurrMonth: () => {
       currMonth.innerText = `${currDate.getFullYear()} 년 ${currDate.getMonth() + 1}월`
     },
-    removeCalender: () => {
+    resetCalender: () => {
       // div로 날짜들 감싸서 div 하나만 지우게 리팩토링
       while (dates.firstChild) {
         dates.firstChild.remove();
@@ -155,26 +215,32 @@ function init() {
       } else {
         currDate.setMonth(currDate.getMonth() - 1);
       }
-      calenderProcess.removeCalender();
+      calenderProcess.resetCalender();
       calenderProcess.dateCulculation();
     },
     viewCalender: dateCulData => {
       const loopNumber = dateCulData.firstDay + dateCulData.lastDate;
+      const currMonthDates = document.createElement('div');
+      currMonthDates.classList.add('currMonth-dates');
+
       let viewDate = 1;
 
       for (let i = 0; i < loopNumber; i++) {
         const dateEle = document.createElement('div');
-        const dateNum = document.createElement('span');
-
-        dates.appendChild(dateEle);
-        dateEle.appendChild(dateNum);
-        dateEle.classList.add('dateEle');
-
+        dates.appendChild(currMonthDates);
+        currMonthDates.appendChild(dateEle);
+        
         if (i >= dateCulData.firstDay) {
-          dateNum.innerText = viewDate++;
+          const dateNum = document.createElement('span');
+          dateNum.innerText = viewDate;
+          dateEle.classList.add(`date-${viewDate}`);
+          dateNum.classList.add(`date-number`);
+          dateEle.appendChild(dateNum);
+          viewDate++;
+        } else {
+          dateEle.classList.add('emptyDate');
         }
       }
-
       calenderProcess.viewCurrMonth();
     },
     dateCulculation: () => {
