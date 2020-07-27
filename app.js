@@ -12,6 +12,8 @@ const userList = document.querySelector('.userList');
 
 function init() {
   const currDate = new Date();
+  // let selectedUser = null;
+
   const modalsProcess = {
     initMarkup: () => {
       const currContent = document.createElement('div');
@@ -93,10 +95,11 @@ function init() {
   }
 
   const userProcess = {
+    selectedUser: null,
     selectDayOf: user => {
       const currMonthDates = document.querySelector('.currMonth-dates');
       const selecteUserName = user.currentTarget.firstChild.innerHTML;
-      const hasSelectedUser = user.currentTarget.classList.toggle('selectedUser');
+      const hasSelectedUser = user.currentTarget.classList.toggle('selected-user');
 
       if (hasSelectedUser) {
         currMonthDates.addEventListener('click', e => {
@@ -145,10 +148,23 @@ function init() {
 
       // });
     },
-    selecteUser: user => {
-      user.currentTarget.classList('selectedUser');
-      const a = user.currentTarget.firstChild.innerHTML;
-      console.log(a)
+    selectUserHandler: user => {
+      const selectUser = user.currentTarget;
+      if (userProcess.selectedUser) {
+        userProcess.selectedUser.classList.remove('selected-user');
+
+        if (userProcess.selectedUser === selectUser) {
+          userProcess.selectedUser = null;
+        } else {
+          userProcess.selectedUser = selectUser;
+          userProcess.selectedUser.classList.add('selected-user');
+        }
+
+      } else {
+        userProcess.selectedUser = selectUser;
+        userProcess.selectedUser.classList.add('selected-user');
+      }
+      console.log(userProcess.selectedUser)
     },
     userListUp: () => {
       const newUser = document.createElement('div');
@@ -159,8 +175,7 @@ function init() {
       newUser.appendChild(newUserName);
 
       newUser.addEventListener('click', e => {
-        userProcess.selecteUser(e);
-        // userProcess.datesOnEvent();
+        userProcess.selectUserHandler(e);
       });
       modalsProcess.closeModal();
     },
