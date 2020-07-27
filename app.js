@@ -11,9 +11,6 @@ const modalContent = document.querySelector('.modal-content');
 const userList = document.querySelector('.userList');
 
 function init() {
-  const currDate = new Date();
-  // let selectedUser = null;
-
   const modalsProcess = {
     initMarkup: () => {
       const currContent = document.createElement('div');
@@ -150,7 +147,7 @@ function init() {
     },
     selectUserHandler: user => {
       const selectUser = user.currentTarget;
-      
+
       if (userProcess.selectedUser === selectUser) {
         userProcess.selectedUser.classList.remove('selected-user');
         userProcess.selectedUser = null;
@@ -210,9 +207,10 @@ function init() {
   }
 
   const calenderProcess = {
+    currDate: new Date(),
     // 첫번째 자식 div만 지우면 되지만 두번 눌러야 동작해서 while처리 추후 리팩토링
     viewCurrMonth: () => {
-      currMonth.innerText = `${currDate.getFullYear()} 년 ${currDate.getMonth() + 1}월`
+      currMonth.innerText = `${calenderProcess.currDate.getFullYear()} 년 ${calenderProcess.currDate.getMonth() + 1}월`
     },
     resetCalender: () => {
       // div로 날짜들 감싸서 div 하나만 지우게 리팩토링
@@ -222,9 +220,9 @@ function init() {
     },
     monthHandler: () => {
       if (event.target.className === 'nextMonthBtn') {
-        currDate.setMonth(currDate.getMonth() + 1);
+        calenderProcess.currDate.setMonth(calenderProcess.currDate.getMonth() + 1);
       } else {
-        currDate.setMonth(currDate.getMonth() - 1);
+        calenderProcess.currDate.setMonth(calenderProcess.currDate.getMonth() - 1);
       }
       calenderProcess.resetCalender();
       calenderProcess.dateCulculation();
@@ -255,11 +253,11 @@ function init() {
       calenderProcess.viewCurrMonth();
     },
     dateCulculation: () => {
-      currDate.setDate(1);
+      calenderProcess.currDate.setDate(1);
 
       const dateCulData = {
-        firstDay: currDate.getDay(),
-        lastDate: new Date(currDate.getFullYear(), currDate.getMonth() + 1, 0).getDate()
+        firstDay: calenderProcess.currDate.getDay(),
+        lastDate: new Date(calenderProcess.currDate.getFullYear(), calenderProcess.currDate.getMonth() + 1, 0).getDate()
       }
       calenderProcess.viewCalender(dateCulData);
     }
