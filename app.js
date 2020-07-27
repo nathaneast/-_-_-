@@ -150,21 +150,17 @@ function init() {
     },
     selectUserHandler: user => {
       const selectUser = user.currentTarget;
-      if (userProcess.selectedUser) {
+      
+      if (userProcess.selectedUser === selectUser) {
         userProcess.selectedUser.classList.remove('selected-user');
-
-        if (userProcess.selectedUser === selectUser) {
-          userProcess.selectedUser = null;
-        } else {
-          userProcess.selectedUser = selectUser;
-          userProcess.selectedUser.classList.add('selected-user');
-        }
-
+        userProcess.selectedUser = null;
       } else {
+        if (userProcess.selectedUser) {
+        userProcess.selectedUser.classList.remove('selected-user');
+        }
         userProcess.selectedUser = selectUser;
         userProcess.selectedUser.classList.add('selected-user');
       }
-      console.log(userProcess.selectedUser)
     },
     userListUp: () => {
       const newUser = document.createElement('div');
