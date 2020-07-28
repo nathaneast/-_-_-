@@ -92,77 +92,39 @@ function init() {
   }
 
   const userProcess = {
-    selectedUser: null,
-    selectDayOf: user => {
-      const currMonthDates = document.querySelector('.currMonth-dates');
-      const selecteUserName = user.currentTarget.firstChild.innerHTML;
-      const hasSelectedUser = user.currentTarget.classList.toggle('selected-user');
-
-      if (hasSelectedUser) {
-        currMonthDates.addEventListener('click', e => {
-          const hasEmptyDate = !e.target.classList.contains('emptyDate');
-          const hasCurrMonthDates = !e.target.classList.contains('currMonth-dates');
-          const dayOfUser = document.createElement('div');
-          const dayOfUserName = document.createElement('span');
-          dayOfUser.classList.add(selecteUserName);
-
-          dayOfUserName.innerText = selecteUserName;
-
-          if (hasEmptyDate && hasCurrMonthDates) {
-            getElementsByClassName
-
-            if (e.target.classList.contains('date-number')) {
-              e.target.parentNode.appendChild(dayOfUser);
-              dayOfUser.appendChild(dayOfUserName);
-            } else {
-              e.target.appendChild(dayOfUser);
-              dayOfUser.appendChild(dayOfUserName);
-            }
-          }
-        });
-      } else {
-        // 선택된 유저 또 누르면 이벤트 제거 되야함
-
-
-        // document.querySelector('.currMonth-dates').removeEventListener('click', e => {
-        //   if(!e.target.classList.contains('emptyDate')) {
-        //     console.log(e.target);
-        //   }
-        // });
-      };
-    },
-    datesOnEvent: user => {
-      const currDates = document.querySelector('.currMonth-dates').childNodes;
-      for (let i = 0; i <= currDates.length; i++) {
-        if (!currDates[i].classList.contains('emptyDate')) {
-          currDates[i].addEventListener('click', )
-          //유저인자 받아야 유저 이름 알 수 있음 굳이 ? 
-        }
-      }
-
-      // const selecteUser = user.currentTarget.firstChild.innerHTML;
-      // const dates = document.querySelector('.currMonth-dates').childNodes;
-
-      // });
+    selectedUser: {
+      referenceValue: null,
+      userName: null,
+      userKey: null
     },
     selectUserHandler: user => {
-      const selectUser = user.currentTarget;
+      const currSelectUser = user.currentTarget;
+      const userKey = currSelectUser.classList.item(0).split('-')[1];
 
-      if (userProcess.selectedUser === selectUser) {
-        userProcess.selectedUser.classList.remove('selected-user');
-        userProcess.selectedUser = null;
+      if (userProcess.selectedUser.referenceValue === currSelectUser) {
+        userProcess.selectedUser.referenceValue.classList.remove('selected-user');
+        userProcess.selectedUser.referenceValue = null;
+        userProcess.selectedUser.userName = null;
+        userProcess.selectedUser.userKey = null;
+        calenderProcess.calenderEvents.clickEventHandler('remove');
       } else {
-        if (userProcess.selectedUser) {
-        userProcess.selectedUser.classList.remove('selected-user');
+        if (userProcess.selectedUser.referenceValue) {
+        userProcess.selectedUser.referenceValue.classList.remove('selected-user');
+        } else {
+          calenderProcess.calenderEvents.clickEventHandler('add');
         }
-        userProcess.selectedUser = selectUser;
-        userProcess.selectedUser.classList.add('selected-user');
+        userProcess.selectedUser.referenceValue = currSelectUser;
+        userProcess.selectedUser.referenceValue.classList.add('selected-user');
+        userProcess.selectedUser.userName = currSelectUser.firstChild.innerHTML;
+        userProcess.selectedUser.userKey = userKey;
       }
     },
     userListUp: () => {
       const newUser = document.createElement('div');
       const newUserName = document.createElement('span');
+      const userKey = Math.random().toString(36).substr(2,11);
 
+      newUser.classList.add(`userKey-${userKey}`)
       newUserName.innerText = document.querySelector('.userInputName').value;
       userList.appendChild(newUser);
       newUser.appendChild(newUserName);
@@ -208,12 +170,50 @@ function init() {
 
   const calenderProcess = {
     currDate: new Date(),
-    // 첫번째 자식 div만 지우면 되지만 두번 눌러야 동작해서 while처리 추후 리팩토링
+    calenderEvents: {
+      onEvent: e => {
+        const clickedDate = e.currentTarget;
+        const dateUserList = clickedDate.querySelector('.date-userList');
+        const userKey = `userKey-${userProcess.selectedUser.userKey}`;
+        const user = document.createElement('div');
+        const userName = document.createElement('span');
+        let hasSameUser = false;
+
+          for (let i = 0; i < dateUserList.childNodes.length; i++) {
+            if (dateUserList.childNodes[i].classList.contains(userKey)) {
+              hasSameUser = true;
+            }
+          }
+          
+          if (hasSameUser) {
+            const targetUser = dateUserList.querySelector(`.${userKey}`);
+            dateUserList.removeChild(targetUser);
+          } else {
+            dateUserList.appendChild(user);
+            user.appendChild(userName);
+            user.classList.add(userKey);
+            userName.innerText = userProcess.selectedUser.userName;
+          }
+      },
+      clickEventHandler: action => {
+        const currMonthDates = document.querySelector('.currMonth-dates').childNodes;
+
+        for (let i = 0; i < currMonthDates.length; i++) {
+          if (currMonthDates[i].classList.contains('date')) {
+            if (action === 'add') {
+              currMonthDates[i].addEventListener('click', calenderProcess.calenderEvents.onEvent);
+            } else {
+              currMonthDates[i].removeEventListener('click', calenderProcess.calenderEvents.onEvent);
+            }
+          }
+        }
+      },
+    },
     viewCurrMonth: () => {
       currMonth.innerText = `${calenderProcess.currDate.getFullYear()} 년 ${calenderProcess.currDate.getMonth() + 1}월`
     },
     resetCalender: () => {
-      // div로 날짜들 감싸서 div 하나만 지우게 리팩토링
+      //while 안쓰고 첫번째 자식만 지우도록 리팩토링
       while (dates.firstChild) {
         dates.firstChild.remove();
       }
@@ -241,10 +241,15 @@ function init() {
         
         if (i >= dateCulData.firstDay) {
           const dateNum = document.createElement('span');
+          const dateUserList = document.createElement('div');
+          
           dateNum.innerText = viewDate;
-          dateEle.classList.add(`date-${viewDate}`);
-          dateNum.classList.add(`date-number`);
+          dateEle.classList.add('date');
+          dateNum.classList.add('date-number');
+          dateUserList.classList.add('date-userList');
+
           dateEle.appendChild(dateNum);
+          dateEle.appendChild(dateUserList);
           viewDate++;
         } else {
           dateEle.classList.add('emptyDate');
