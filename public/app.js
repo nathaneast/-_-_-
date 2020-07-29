@@ -1,7 +1,13 @@
+
+// import firebase from '/firebase/app'
+// import 'firebase/app'
+// import 'firebase/auth'
+// import 'firebase/firestore'
+
 const dates = document.querySelector('.calender-dates');
 const currMonth = document.querySelector('.currMonth');
 const backMonthBtn = document.querySelector('.backMonthBtn');
-const nextMonthBtn = document.querySelector('.nextMonthBtn');
+const nextMonthBtn = document.querySelector('.nextMonthBtn');``
 const addUserBtn = document.querySelector('.addUserBtn');
 
 const modal = document.querySelector('.modal');
@@ -10,7 +16,10 @@ const modalContent = document.querySelector('.modal-content');
 
 const userList = document.querySelector('.userList');
 
-function init() {
+const database = firebase.database();
+console.log(database)
+
+// function init() {
   const modalsProcess = {
     resetContent: () => {
       const message = document.querySelector('.message');
@@ -118,6 +127,7 @@ function init() {
         userProcess.selectUserHandler(e);
       });
       modalsProcess.closeModal();
+
     },
     addUserCheck: () => {
       const userNameLength = document.querySelector('.userInputName').value.length;
@@ -243,5 +253,5 @@ function init() {
   backMonthBtn.addEventListener('click', calenderProcess.monthHandler);
   nextMonthBtn.addEventListener('click', calenderProcess.monthHandler);
   addUserBtn.addEventListener('click', userProcess.addUser);
-}
-init();
+// }
+// init();
