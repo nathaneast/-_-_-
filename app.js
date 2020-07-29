@@ -12,30 +12,21 @@ const userList = document.querySelector('.userList');
 
 function init() {
   const modalsProcess = {
-    initMarkup: () => {
-      const currContent = document.createElement('div');
-      const message = document.createElement('div');
-      const userInput = document.createElement('div');
-      const btns = document.createElement('div');
-
-      currContent.classList.add('currContent');
-      message.classList.add('message');
-      userInput.classList.add('userInput');
-      btns.classList.add('btns');
-
-      currContent.appendChild(message);
-      currContent.appendChild(userInput);
-      currContent.appendChild(btns);
-      modalContent.appendChild(currContent);
-    },
     resetContent: () => {
-      while (modalContent.firstChild) {
-        modalContent.firstChild.remove();
-      }
+      const message = document.querySelector('.message');
+      const userInput = document.querySelector('.userInput');
+      const btns = document.querySelector('.btns');
+      const modalContents = [message, userInput, btns];
+
+      modalContents.forEach(content => {
+        while (content.firstChild) {
+          content.firstChild.remove();
+        }
+      });
     },
     openModal: () => {
       modal.classList.remove('hidden');
-      modalOverlay.addEventListener('click', (e) => {
+      modalOverlay.addEventListener('click', e => {
         if (e.target === e.currentTarget) {
           modalsProcess.resetContent();
           modal.classList.add('hidden');
@@ -43,29 +34,25 @@ function init() {
       });
     },
     closeModal: () => {
-      modal.classList.add('hidden');
       modalsProcess.resetContent();
+      modal.classList.add('hidden');
     },
     warningMessage: {
       userCount: () => {
         modalsProcess.resetContent();
-        modalsProcess.initMarkup();
 
         const warningMessage = document.createElement('h3');
         const closeBtn = document.createElement('button');
 
         document.querySelector('.message').appendChild(warningMessage);
-        document.querySelector('.message').appendChild(warningMessage);
         document.querySelector('.btns').appendChild(closeBtn);
 
         warningMessage.innerText = '인원은 5명을 초과할 수 없습니다';
         closeBtn.innerText = '확인';
-
         closeBtn.addEventListener('click', modalsProcess.closeModal);
       },
       userName: () => {
         modalsProcess.resetContent();
-        modalsProcess.initMarkup();
 
         const warningMessage = document.createElement('h3');
         const returnAddUserBtn = document.createElement('button');
@@ -93,30 +80,28 @@ function init() {
 
   const userProcess = {
     selectedUser: {
-      referenceValue: null,
+      // referenceValue: null,
       userName: null,
       userKey: null
     },
     selectUserHandler: user => {
       const currSelectUser = user.currentTarget;
-      const userKey = currSelectUser.classList.item(0).split('-')[1];
+      const currSelectUserKey = currSelectUser.classList.item(0).split('-')[1];
 
-      if (userProcess.selectedUser.referenceValue === currSelectUser) {
-        userProcess.selectedUser.referenceValue.classList.remove('selected-user');
-        userProcess.selectedUser.referenceValue = null;
+      if (userProcess.selectedUser.userKey === currSelectUserKey) {
+        currSelectUser.classList.remove('selected-user');
         userProcess.selectedUser.userName = null;
         userProcess.selectedUser.userKey = null;
         calenderProcess.calenderEvents.clickEventHandler('remove');
       } else {
-        if (userProcess.selectedUser.referenceValue) {
-        userProcess.selectedUser.referenceValue.classList.remove('selected-user');
+        if (userProcess.selectedUser.userKey) {
+         userList.querySelector(`.userKey-${userProcess.selectedUser.userKey}`).classList.remove('selected-user');
         } else {
           calenderProcess.calenderEvents.clickEventHandler('add');
         }
-        userProcess.selectedUser.referenceValue = currSelectUser;
-        userProcess.selectedUser.referenceValue.classList.add('selected-user');
+        currSelectUser.classList.add('selected-user');
+        userProcess.selectedUser.userKey = currSelectUserKey;
         userProcess.selectedUser.userName = currSelectUser.firstChild.innerHTML;
-        userProcess.selectedUser.userKey = userKey;
       }
     },
     userListUp: () => {
@@ -146,7 +131,6 @@ function init() {
     },
     addUser: () => {
       modalsProcess.openModal();
-      modalsProcess.initMarkup();
 
       const addUserMessage = document.createElement('h3');
       const userInputName = document.createElement('input');
@@ -196,14 +180,12 @@ function init() {
           }
       },
       clickEventHandler: action => {
-        const currMonthDates = document.querySelector('.currMonth-dates').childNodes;
-
-        for (let i = 0; i < currMonthDates.length; i++) {
-          if (currMonthDates[i].classList.contains('date')) {
+        for (let i = 0; i < dates.childNodes.length; i++) {
+          if (dates.childNodes[i].classList.contains('date')) {
             if (action === 'add') {
-              currMonthDates[i].addEventListener('click', calenderProcess.calenderEvents.onEvent);
+              dates.childNodes[i].addEventListener('click', calenderProcess.calenderEvents.onEvent);
             } else {
-              currMonthDates[i].removeEventListener('click', calenderProcess.calenderEvents.onEvent);
+              dates.childNodes[i].removeEventListener('click', calenderProcess.calenderEvents.onEvent);
             }
           }
         }
@@ -212,47 +194,36 @@ function init() {
     viewCurrMonth: () => {
       currMonth.innerText = `${calenderProcess.currDate.getFullYear()} 년 ${calenderProcess.currDate.getMonth() + 1}월`
     },
-    resetCalender: () => {
-      //while 안쓰고 첫번째 자식만 지우도록 리팩토링
-      while (dates.firstChild) {
-        dates.firstChild.remove();
+    resetCalenderOfUser: () => {
+      for (let i = 0; i < dates.childNodes.length; i++) {
+        const cuurDateUserList = dates.childNodes[i].querySelector('.date-userList');
+        while (cuurDateUserList.firstChild) {
+          cuurDateUserList.firstChild.remove();
+        }
       }
     },
     monthHandler: () => {
+      calenderProcess.resetCalenderOfUser();
       if (event.target.className === 'nextMonthBtn') {
         calenderProcess.currDate.setMonth(calenderProcess.currDate.getMonth() + 1);
       } else {
         calenderProcess.currDate.setMonth(calenderProcess.currDate.getMonth() - 1);
       }
-      calenderProcess.resetCalender();
       calenderProcess.dateCulculation();
     },
     viewCalender: dateCulData => {
       const loopNumber = dateCulData.firstDay + dateCulData.lastDate;
-      const currMonthDates = document.createElement('div');
-      currMonthDates.classList.add('currMonth-dates');
-
+      const dateNodes = dates.childNodes;
       let viewDate = 1;
 
       for (let i = 0; i < loopNumber; i++) {
-        const dateEle = document.createElement('div');
-        dates.appendChild(currMonthDates);
-        currMonthDates.appendChild(dateEle);
-        
-        if (i >= dateCulData.firstDay) {
-          const dateNum = document.createElement('span');
-          const dateUserList = document.createElement('div');
-          
-          dateNum.innerText = viewDate;
-          dateEle.classList.add('date');
-          dateNum.classList.add('date-number');
-          dateUserList.classList.add('date-userList');
-
-          dateEle.appendChild(dateNum);
-          dateEle.appendChild(dateUserList);
+        if (dateCulData.firstDay <= i) {
+          dateNodes[i].classList.add('date');
+          dateNodes[i].querySelector('.date-num').innerText = viewDate;
           viewDate++;
-        } else {
-          dateEle.classList.add('emptyDate');
+        } else if (dateNodes[i].classList.contains('date')) {
+          dateNodes[i].classList.remove('date');
+          dateNodes[i].querySelector('.date-num').innerText = '';
         }
       }
       calenderProcess.viewCurrMonth();
