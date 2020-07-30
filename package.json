@@ -1,0 +1,22 @@
+{
+  "name": "day-off-calender",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nathaneast/day-of-calender.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nathaneast/day-of-calender/issues"
+  },
+  "homepage": "https://github.com/nathaneast/day-of-calender#readme",
+  "dependencies": {
+    "firebase": "^7.17.1"
+  }
+}

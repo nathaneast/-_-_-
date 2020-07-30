@@ -1,8 +1,10 @@
+// import * as firebase from "firebase/app";
+// import "firebase/auth";
+// import "firebase/database";
 
-// import firebase from '/firebase/app'
-// import 'firebase/app'
-// import 'firebase/auth'
-// import 'firebase/firestore'
+import firebase from './firebase.js';
+
+console.log(firebase.database())
 
 const dates = document.querySelector('.calender-dates');
 const currMonth = document.querySelector('.currMonth');
@@ -15,9 +17,6 @@ const modalOverlay = document.querySelector('.modal-overlay');
 const modalContent = document.querySelector('.modal-content');
 
 const userList = document.querySelector('.userList');
-
-const database = firebase.database();
-console.log(database)
 
 // function init() {
   const modalsProcess = {
