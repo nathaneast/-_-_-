@@ -1,10 +1,6 @@
-// import * as firebase from "firebase/app";
-// import "firebase/auth";
-// import "firebase/database";
-
 import firebase from './firebase.js';
 
-console.log(firebase.database())
+const database = firebase.database();
 
 const dates = document.querySelector('.calender-dates');
 const currMonth = document.querySelector('.currMonth');
@@ -14,11 +10,70 @@ const addUserBtn = document.querySelector('.addUserBtn');
 
 const modal = document.querySelector('.modal');
 const modalOverlay = document.querySelector('.modal-overlay');
-const modalContent = document.querySelector('.modal-content');
 
 const userList = document.querySelector('.userList');
 
-// function init() {
+const databaseProcess = {
+  removeUserInDates: currDateKeys => {
+    database.ref(`dates/${currDateKeys.yearMonthKey}/${currDateKeys.dateKey}`).once('value', snapshot => {
+      const dayOfDateUsers = snapshot.val();
+      delete dayOfDateUsers[userProcess.selectedUser.userKey];
+
+      if (Object.keys(dayOfDateUsers).length) {
+        database.ref(`dates/${currDateKeys.yearMonthKey}/${currDateKeys.dateKey}`).set(dayOfDateUsers);
+      } else {
+        database.ref(`dates/${currDateKeys.yearMonthKey}/${currDateKeys.dateKey}`).remove();
+      }
+    });
+  },
+  removeDateInUser: currDatekeys => {
+    database.ref(`users/${userProcess.selectedUser.userKey}/dayOffDates`).once('value', snapshot => {
+      const dayOffDateData = snapshot.val();
+      delete dayOffDateData[currDatekeys.YearMonthDateKey];
+
+      if(Object.keys(dayOffDateData).length) {
+        database.ref(`users/${userProcess.selectedUser.userKey}/dayOffDates`).set(dayOffDateData);
+      } else {
+        database.ref(`users/${userProcess.selectedUser.userKey}/dayOffDates`).remove();
+      }
+    });
+  },
+  putUserInDates: currDatekeys => {
+    database.ref(`dates/${currDatekeys.yearMonthKey}/${currDatekeys.dateKey}`).once('value', snapshot => {
+      const usersData = snapshot.val();
+
+      if (usersData) {
+        usersData[userProcess.selectedUser.userKey] = true;
+        database.ref(`dates/${currDatekeys.yearMonthKey}/${currDatekeys.dateKey}`).update(usersData);
+      } else {
+        database.ref(`dates/${currDatekeys.yearMonthKey}/${currDatekeys.dateKey}`).update({
+          [userProcess.selectedUser.userKey]: true
+        });
+      }
+    });
+  },
+  putDateInUserData: currDatekeys => {
+    database.ref(`users/${userProcess.selectedUser.userKey}/dayOffDates/${currDatekeys.yearMonthKey}`).once('value', snapshot => {
+      const monthDayOfDate = snapshot.val();
+
+      if (monthDayOfDate) {
+        monthDayOfDate[currDatekeys.dateKey] = true;
+        database.ref(`users/${userProcess.selectedUser.userKey}/dayOffDates/${currDatekeys.yearMonthKey}`).set(monthDayOfDate);
+      } else {
+        database.ref(`users/${userProcess.selectedUser.userKey}/dayOffDates/${currDatekeys.yearMonthKey}`).update({
+          [currDatekeys.dateKey]: true
+        });
+      }
+    });
+  },
+  putUser: (userkey, userName) => {
+    const userData = {
+      userName,
+    }
+    database.ref(`users/${userkey}`).update(userData);
+  }
+}
+
   const modalsProcess = {
     resetContent: () => {
       const message = document.querySelector('.message');
@@ -88,7 +143,6 @@ const userList = document.querySelector('.userList');
 
   const userProcess = {
     selectedUser: {
-      // referenceValue: null,
       userName: null,
       userKey: null
     },
@@ -116,9 +170,10 @@ const userList = document.querySelector('.userList');
       const newUser = document.createElement('div');
       const newUserName = document.createElement('span');
       const userKey = Math.random().toString(36).substr(2,11);
+      const inputUserName = document.querySelector('.inputUserName').value;
 
       newUser.classList.add(`userKey-${userKey}`)
-      newUserName.innerText = document.querySelector('.userInputName').value;
+      newUserName.innerText = inputUserName;
       userList.appendChild(newUser);
       newUser.appendChild(newUserName);
 
@@ -126,10 +181,10 @@ const userList = document.querySelector('.userList');
         userProcess.selectUserHandler(e);
       });
       modalsProcess.closeModal();
-
+      databaseProcess.putUser(userKey, inputUserName);
     },
     addUserCheck: () => {
-      const userNameLength = document.querySelector('.userInputName').value.length;
+      const userNameLength = document.querySelector('.inputUserName').value.length;
       if (userNameLength === 0 || userNameLength > 5) {
         modalsProcess.warningMessage.userName();
       } else if (userList.childElementCount === 5) {
@@ -142,13 +197,13 @@ const userList = document.querySelector('.userList');
       modalsProcess.openModal();
 
       const addUserMessage = document.createElement('h3');
-      const userInputName = document.createElement('input');
+      const inputUserName = document.createElement('input');
       const addBtn = document.createElement('button');
       const closeBtn = document.createElement('button');
-      userInputName.classList.add('userInputName');
+      inputUserName.classList.add('inputUserName');
 
       document.querySelector('.message').appendChild(addUserMessage);
-      document.querySelector('.userInput').appendChild(userInputName);
+      document.querySelector('.userInput').appendChild(inputUserName);
       document.querySelector('.btns').appendChild(addBtn);
       document.querySelector('.btns').appendChild(closeBtn);
 
@@ -166,10 +221,10 @@ const userList = document.querySelector('.userList');
     calenderEvents: {
       onEvent: e => {
         const clickedDate = e.currentTarget;
+        const dateNum = clickedDate.querySelector('.date-num').innerHTML;
+        const currDatekeys = calenderProcess.createCurrDateKey(dateNum);
         const dateUserList = clickedDate.querySelector('.date-userList');
         const userKey = `userKey-${userProcess.selectedUser.userKey}`;
-        const user = document.createElement('div');
-        const userName = document.createElement('span');
         let hasSameUser = false;
 
           for (let i = 0; i < dateUserList.childNodes.length; i++) {
@@ -181,11 +236,20 @@ const userList = document.querySelector('.userList');
           if (hasSameUser) {
             const targetUser = dateUserList.querySelector(`.${userKey}`);
             dateUserList.removeChild(targetUser);
+
+            databaseProcess.removeDateInUser(currDatekeys);
+            databaseProcess.removeUserInDates(currDatekeys);
           } else {
+            const user = document.createElement('div');
+            const userName = document.createElement('span');
+
             dateUserList.appendChild(user);
             user.appendChild(userName);
             user.classList.add(userKey);
             userName.innerText = userProcess.selectedUser.userName;
+
+            databaseProcess.putDateInUserData(currDatekeys);
+            databaseProcess.putUserInDates(currDatekeys);
           }
       },
       clickEventHandler: action => {
@@ -200,10 +264,19 @@ const userList = document.querySelector('.userList');
         }
       },
     },
+    createCurrDateKey: dateNum => {
+      const currYear = calenderProcess.currDate.getFullYear();
+      const currMonth = calenderProcess.currDate.getMonth() + 1;
+      return {
+        YearMonthDateKey: `${currYear}-${currMonth}-${dateNum}`,
+        yearMonthKey: `${currYear}-${currMonth}`,
+        dateKey: dateNum,
+      }
+    },
     viewCurrMonth: () => {
       currMonth.innerText = `${calenderProcess.currDate.getFullYear()} 년 ${calenderProcess.currDate.getMonth() + 1}월`
     },
-    resetCalenderOfUser: () => {
+    resetUserInCalender: () => {
       for (let i = 0; i < dates.childNodes.length; i++) {
         const cuurDateUserList = dates.childNodes[i].querySelector('.date-userList');
         while (cuurDateUserList.firstChild) {
@@ -212,7 +285,7 @@ const userList = document.querySelector('.userList');
       }
     },
     monthHandler: () => {
-      calenderProcess.resetCalenderOfUser();
+      calenderProcess.resetUserInCalender();
       if (event.target.className === 'nextMonthBtn') {
         calenderProcess.currDate.setMonth(calenderProcess.currDate.getMonth() + 1);
       } else {
@@ -252,5 +325,3 @@ const userList = document.querySelector('.userList');
   backMonthBtn.addEventListener('click', calenderProcess.monthHandler);
   nextMonthBtn.addEventListener('click', calenderProcess.monthHandler);
   addUserBtn.addEventListener('click', userProcess.addUser);
-// }
-// init();
