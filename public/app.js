@@ -14,53 +14,114 @@ const modalOverlay = document.querySelector('.modal-overlay');
 const userList = document.querySelector('.userList');
 
 const databaseProcess = {
+  getCurrMonthCalender: () => {
+    const currYear = calenderProcess.currDate.getFullYear();
+    const currMonth = calenderProcess.currDate.getMonth() + 1;
+    const currKey = `${currYear}-${currMonth}`;
+
+    database.ref(`dates/${currKey}`).once('value', snapshot => {
+      const currMonthDates = snapshot.val();
+
+      if (currMonthDates) {
+        const dateKeys = Object.keys(currMonthDates);
+
+        dateKeys.forEach(date => {
+          Object.keys(currMonthDates[date]).forEach(userKey => {
+            const user = document.createElement('div');
+            const userName = document.createElement('span');
+
+            user.classList.add(`userKey-${userKey}`);
+            userName.innerText = currMonthDates[date][userKey];
+
+            const targetDate = dates.querySelector(`.date-${Number(date)}`);
+            const targetDateUserList = targetDate.querySelector('.date-userList');
+
+            targetDateUserList.appendChild(user);
+            user.appendChild(userName);
+          });
+        });
+      }
+    });
+  },
+  getUserData: () => {
+    database.ref(`users`).once('value', snapshot => {
+      const users = snapshot.val();
+
+      if (users) {
+        const usersKey = Object.keys(users);
+
+        usersKey.forEach(key => {
+          const user = document.createElement('div');
+          const userName = document.createElement('span');
+          
+          user.classList.add(`userKey-${key}`);
+          userName.innerText = users[key].userName;
+
+          userList.appendChild(user);
+          user.appendChild(userName);
+
+          user.addEventListener('click', e => {
+            userProcess.selectUserHandler(e);
+          });
+        });
+      }
+    });
+  },
   removeUserInDates: currDateKeys => {
-    database.ref(`dates/${currDateKeys.yearMonthKey}/${currDateKeys.dateKey}`).once('value', snapshot => {
+    const currDate = `dates/${currDateKeys.yearMonthKey}/${currDateKeys.dateKey}`;
+
+    database.ref(currDate).once('value', snapshot => {
       const dayOfDateUsers = snapshot.val();
       delete dayOfDateUsers[userProcess.selectedUser.userKey];
 
       if (Object.keys(dayOfDateUsers).length) {
-        database.ref(`dates/${currDateKeys.yearMonthKey}/${currDateKeys.dateKey}`).set(dayOfDateUsers);
+        database.ref(currDate).set(dayOfDateUsers);
       } else {
-        database.ref(`dates/${currDateKeys.yearMonthKey}/${currDateKeys.dateKey}`).remove();
+        database.ref(currDate).remove();
       }
     });
   },
   removeDateInUser: currDatekeys => {
-    database.ref(`users/${userProcess.selectedUser.userKey}/dayOffDates`).once('value', snapshot => {
+    const currMonthDayOfDate = `users/${userProcess.selectedUser.userKey}/dayOffDates/${currDatekeys.yearMonthKey}`;
+
+    database.ref(currMonthDayOfDate).once('value', snapshot => {
       const dayOffDateData = snapshot.val();
-      delete dayOffDateData[currDatekeys.YearMonthDateKey];
+      delete dayOffDateData[currDatekeys.dateKey];
 
       if(Object.keys(dayOffDateData).length) {
-        database.ref(`users/${userProcess.selectedUser.userKey}/dayOffDates`).set(dayOffDateData);
+        database.ref(currMonthDayOfDate).set(dayOffDateData);
       } else {
-        database.ref(`users/${userProcess.selectedUser.userKey}/dayOffDates`).remove();
+        database.ref(currMonthDayOfDate).remove();
       }
     });
   },
   putUserInDates: currDatekeys => {
-    database.ref(`dates/${currDatekeys.yearMonthKey}/${currDatekeys.dateKey}`).once('value', snapshot => {
+    const currDateUsers = `dates/${currDatekeys.yearMonthKey}/${currDatekeys.dateKey}`;
+    
+    database.ref(currDateUsers).once('value', snapshot => {
       const usersData = snapshot.val();
 
       if (usersData) {
-        usersData[userProcess.selectedUser.userKey] = true;
-        database.ref(`dates/${currDatekeys.yearMonthKey}/${currDatekeys.dateKey}`).update(usersData);
+        usersData[userProcess.selectedUser.userKey] = userProcess.selectedUser.userName;
+        database.ref(currDateUsers).set(usersData);
       } else {
-        database.ref(`dates/${currDatekeys.yearMonthKey}/${currDatekeys.dateKey}`).update({
-          [userProcess.selectedUser.userKey]: true
+        database.ref(currDateUsers).update({
+          [userProcess.selectedUser.userKey]: userProcess.selectedUser.userName
         });
       }
     });
   },
   putDateInUserData: currDatekeys => {
-    database.ref(`users/${userProcess.selectedUser.userKey}/dayOffDates/${currDatekeys.yearMonthKey}`).once('value', snapshot => {
+    const currMonthDayOfDate = `users/${userProcess.selectedUser.userKey}/dayOffDates/${currDatekeys.yearMonthKey}`;
+
+    database.ref(currMonthDayOfDate).once('value', snapshot => {
       const monthDayOfDate = snapshot.val();
 
       if (monthDayOfDate) {
         monthDayOfDate[currDatekeys.dateKey] = true;
-        database.ref(`users/${userProcess.selectedUser.userKey}/dayOffDates/${currDatekeys.yearMonthKey}`).set(monthDayOfDate);
+        database.ref(currMonthDayOfDate).set(monthDayOfDate);
       } else {
-        database.ref(`users/${userProcess.selectedUser.userKey}/dayOffDates/${currDatekeys.yearMonthKey}`).update({
+        database.ref(currMonthDayOfDate).update({
           [currDatekeys.dateKey]: true
         });
       }
@@ -68,7 +129,7 @@ const databaseProcess = {
   },
   putUser: (userkey, userName) => {
     const userData = {
-      userName,
+      userName
     }
     database.ref(`users/${userkey}`).update(userData);
   }
@@ -254,7 +315,7 @@ const databaseProcess = {
       },
       clickEventHandler: action => {
         for (let i = 0; i < dates.childNodes.length; i++) {
-          if (dates.childNodes[i].classList.contains('date')) {
+          if (!dates.childNodes[i].classList.contains('emptyDate')) {
             if (action === 'add') {
               dates.childNodes[i].addEventListener('click', calenderProcess.calenderEvents.onEvent);
             } else {
@@ -292,19 +353,22 @@ const databaseProcess = {
         calenderProcess.currDate.setMonth(calenderProcess.currDate.getMonth() - 1);
       }
       calenderProcess.dateCulculation();
+      databaseProcess.getCurrMonthCalender();
     },
     viewCalender: dateCulData => {
-      const loopNumber = dateCulData.firstDay + dateCulData.lastDate;
+      const monthDate = dateCulData.firstDay + dateCulData.lastDate;
       const dateNodes = dates.childNodes;
       let viewDate = 1;
 
-      for (let i = 0; i < loopNumber; i++) {
-        if (dateCulData.firstDay <= i) {
-          dateNodes[i].classList.add('date');
+      for (let i = 0; i < dates.childElementCount; i++) {
+        dateNodes[i].removeAttribute('class');
+
+        if (dateCulData.firstDay <= i && dateCulData.lastDate >= viewDate) {
+          dateNodes[i].classList.add(`date-${viewDate}`);
           dateNodes[i].querySelector('.date-num').innerText = viewDate;
           viewDate++;
-        } else if (dateNodes[i].classList.contains('date')) {
-          dateNodes[i].classList.remove('date');
+        } else {
+          dateNodes[i].classList.add('emptyDate');
           dateNodes[i].querySelector('.date-num').innerText = '';
         }
       }
@@ -321,6 +385,8 @@ const databaseProcess = {
     }
   }
   calenderProcess.dateCulculation();
+  databaseProcess.getUserData();
+  databaseProcess.getCurrMonthCalender();
 
   backMonthBtn.addEventListener('click', calenderProcess.monthHandler);
   nextMonthBtn.addEventListener('click', calenderProcess.monthHandler);
