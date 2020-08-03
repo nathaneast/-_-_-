@@ -5,7 +5,7 @@ const database = firebase.database();
 const dates = document.querySelector('.calender-dates');
 const currMonth = document.querySelector('.currMonth');
 const backMonthBtn = document.querySelector('.backMonthBtn');
-const nextMonthBtn = document.querySelector('.nextMonthBtn'); ``
+const nextMonthBtn = document.querySelector('.nextMonthBtn');
 const addUserBtn = document.querySelector('.addUserBtn');
 
 const modal = document.querySelector('.modal');
@@ -15,6 +15,29 @@ const modalUserInput = document.querySelector('.userInput');
 const modalBtns = document.querySelector('.btns');
 
 const userList = document.querySelector('.userList');
+
+const utils = {
+  colors: ['pink','puple','yellow','green','blue'],
+  selectColor: async () => {
+    let currUserColor = null;
+
+    await database.ref('/selectedColor').once('value', snapshot => {
+      const selectedColor = snapshot.val();
+      if (selectedColor) {
+        for (let i = 0; i < utils.colors.length; i++) {
+          if (!selectedColor[utils.colors[i]]) {
+            currUserColor = selectedColor.colors[i];
+            break;
+          }
+        }
+      } else {
+        currUserColor = utils.colors[0];
+      }
+    });
+
+    return currUserColor;
+  }
+}
 
 const databaseProcess = {
   deleteUser: () => {
@@ -46,6 +69,10 @@ const databaseProcess = {
             });
           });
         });
+      } else {
+        databaseProcess.deleteUser();
+        userProcess.selectedUser.userKey = null;
+        userProcess.selectedUser.userName = null;
       }
     });
   },
@@ -66,6 +93,7 @@ const databaseProcess = {
             const userName = document.createElement('span');
 
             user.classList.add(`userKey-${userKey}`);
+            userName.classList.add('user-name');
             userName.innerText = currMonthDates[date][userKey];
 
             const targetDate = dates.querySelector(`.date-${Number(date)}`);
@@ -90,6 +118,8 @@ const databaseProcess = {
           const userName = document.createElement('span');
 
           user.classList.add(`userKey-${key}`);
+          user.classList.add('user');
+
           userName.innerText = users[key].userName;
 
           userList.appendChild(user);
@@ -248,8 +278,10 @@ const userProcess = {
     userList.removeChild(targetUser);
     modalsProcess.closeModal();
 
-    for (let i = 0; i <= currMonthUserDayOffs.length; i++) {
-      currMonthUserDayOffs[i].parentNode.removeChild(currMonthUserDayOffs[i]);
+    if (currMonthUserDayOffs.length) {
+      for (let i = 0; i < currMonthUserDayOffs.length; i++) {
+        currMonthUserDayOffs[i].parentNode.removeChild(currMonthUserDayOffs[i]);
+      }
     }
   },
   deleteUser: user => {
@@ -297,13 +329,17 @@ const userProcess = {
       userProcess.selectedUser.userName = currSelectUser.firstChild.innerHTML;
     }
   },
-  userListUp: () => {
+  userListUp: async () => {
     const newUser = document.createElement('div');
     const newUserName = document.createElement('span');
     const userKey = Math.random().toString(36).substr(2, 11);
     const inputUserName = document.querySelector('.inputUserName').value;
+    const userColor = await utils.selectColor();
 
-    newUser.classList.add(`userKey-${userKey}`)
+    newUser.classList.add(`userKey-${userKey}`);
+    newUser.classList.add(`userColor-${userColor}`)
+    newUser.classList.add('user');
+
     newUserName.innerText = inputUserName;
     userList.appendChild(newUser);
     newUser.appendChild(newUserName);
@@ -376,10 +412,11 @@ const calenderProcess = {
         const user = document.createElement('div');
         const userName = document.createElement('span');
 
+        user.classList.add(userKey);
+        userName.classList.add('user-name');
+        userName.innerText = userProcess.selectedUser.userName;
         dateUserList.appendChild(user);
         user.appendChild(userName);
-        user.classList.add(userKey);
-        userName.innerText = userProcess.selectedUser.userName;
 
         databaseProcess.putDateInUserData(currDatekeys);
         databaseProcess.putUserInDates(currDatekeys);
@@ -390,8 +427,10 @@ const calenderProcess = {
         if (!dates.childNodes[i].classList.contains('emptyDate')) {
           if (action === 'add') {
             dates.childNodes[i].addEventListener('click', calenderProcess.calenderEvents.onEvent);
+            dates.childNodes[i].classList.add('haveDate');
           } else {
             dates.childNodes[i].removeEventListener('click', calenderProcess.calenderEvents.onEvent);
+            dates.childNodes[i].classList.remove('haveDate');
           }
         }
       }
@@ -429,9 +468,9 @@ const calenderProcess = {
     databaseProcess.getCurrMonthCalender();
   },
   viewCalender: dateCulData => {
-    const monthDate = dateCulData.firstDay + dateCulData.lastDate;
     const dateNodes = dates.childNodes;
     let viewDate = 1;
+    let viewDay = dateCulData.firstDay;
 
     for (let i = 0; i < dates.childElementCount; i++) {
       dateNodes[i].removeAttribute('class');
@@ -439,11 +478,23 @@ const calenderProcess = {
       if (dateCulData.firstDay <= i && dateCulData.lastDate >= viewDate) {
         dateNodes[i].classList.add(`date-${viewDate}`);
         dateNodes[i].querySelector('.date-num').innerText = viewDate;
+        
+        if (viewDay === 6) {
+          dateNodes[i].querySelector('.date-num').classList.add('day-sat')
+          viewDay = 0;
+        } else if (viewDay >= 1){
+          viewDay++;
+        } else {
+          dateNodes[i].querySelector('.date-num').classList.add('day-sun')
+          viewDay++;
+        }
+
         viewDate++;
       } else {
         dateNodes[i].classList.add('emptyDate');
         dateNodes[i].querySelector('.date-num').innerText = '';
       }
+      dateNodes[i].classList.add('date');
     }
     calenderProcess.viewCurrMonth();
   },

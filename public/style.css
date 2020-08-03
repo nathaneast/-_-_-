@@ -1,13 +1,79 @@
+body {
+  background-color: #2c3e50;
+  display: flex;
+  justify-content: center;
+}
+
+.container {
+  text-align: center;
+  background-color: #ecf0f1;
+  width: 900px;
+  margin: 50px 0px;
+  border-radius: 50px;
+}
+
+.handleMonth-button {
+  height: 80px;
+}
+
+.backMonthBtn, .nextMonthBtn {
+  all: unset;
+  color: #2c3e50;
+  font-weight: bolder;
+  font-size: 20px;
+  padding: 8px;
+  margin: 10px 5px;
+  cursor: pointer;
+}
+
+.backMonthBtn:hover, .nextMonthBtn:hover {
+  font-size: 30px;
+  transition: font-size .3s;
+  
+}
+
+.calender {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
 .calender-days {
   display: grid;
-  grid-template-columns: repeat(7, 100px);
-  grid-template-rows: repeat(1, 70px);
+  grid-template-columns: repeat(7, 120px);
+  grid-template-rows: repeat(1, 50px);
+  grid-gap: 5px;
+}
+
+.calender-day {
+  font-size: 23px;
+  font-weight: bold;
 }
 
 .calender-dates {
   display: grid;
-  grid-template-columns: repeat(7, 100px);
-  grid-template-rows: repeat(6, minmax(70px, auto));
+  grid-template-columns: repeat(7, 120px);
+  grid-template-rows: repeat(6, minmax(100px, auto));
+  grid-gap: 5px;
+}
+
+.date {
+  border: 1px dotted #bdc3c7;
+}
+
+.date-userList {
+  display: grid;
+  grid-template-columns: repeat(2, 60px);
+  justify-content: center;
+}
+
+.userList {
+  display: flex;
+  justify-content: center;
+  height: 100px;
+  align-items: center;
+  margin: 5px;
 }
 
 .modal {
@@ -48,4 +114,53 @@
 
 .selected-user {
   color: red;
+}
+
+.day-sun {
+  color: #cf6a87;
+}
+
+.day-sat {
+  color: #778beb;
+}
+
+.date-num {
+  font-size: 20px;
+}
+
+.haveDate:hover {
+  border: 1px dashed #2c3e50;
+}
+
+.user {
+  margin: 0px 15px;
+  font-size: 20px;
+  width: 80px;
+  border-radius: 10px;
+  color: #303952;
+  padding: 3px 0px;
+  cursor: pointer;
+}
+
+.user-name {
+  padding: 3px;
+}
+
+.userColor-pink {
+  background-color: #ffcccc;
+}
+
+.userColor-purple {
+  background-color: #a29bfe;
+}
+
+.userColor-yellow {
+  background-color: #fffa65;
+}
+
+.userColor-green {
+  background-color: #badc58;
+}
+.userColor-blue {
+  background-color: #7ed6df;
 }
