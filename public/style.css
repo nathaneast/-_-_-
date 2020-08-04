@@ -10,6 +10,13 @@ body {
   width: 900px;
   margin: 50px 0px;
   border-radius: 50px;
+  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+}
+
+.currMonth {
+  color: #2c3e50;
+  font-size: 38px;
+  margin: 23px;
 }
 
 .handleMonth-button {
@@ -29,7 +36,6 @@ body {
 .backMonthBtn:hover, .nextMonthBtn:hover {
   font-size: 30px;
   transition: font-size .3s;
-  
 }
 
 .calender {
@@ -58,22 +64,63 @@ body {
   grid-gap: 5px;
 }
 
-.date {
+.calender-dates > div {
   border: 1px dotted #bdc3c7;
 }
+
 
 .date-userList {
   display: grid;
   grid-template-columns: repeat(2, 60px);
   justify-content: center;
+  grid-gap: 5px 0px;
 }
 
 .userList {
   display: flex;
   justify-content: center;
-  height: 100px;
+  height: 55px;
   align-items: center;
   margin: 5px;
+}
+
+.userList > div:hover {
+  cursor: pointer;
+  border: 1px solid #7f8c8d;
+}
+
+.userController {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.userBtn {
+  border-radius: 75px;
+  width: 60px;
+  height: 60px;
+  background-color: #2c3e50;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 15px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+  cursor: pointer;
+}
+
+.userBtn:hover {
+  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+  border: 1px solid black;
+}
+
+.addUserBtn {
+  all: unset;
+  font-size: 30px;
+  color: #bdc3c7;
+  font-weight: bolder;
 }
 
 .modal {
@@ -96,7 +143,7 @@ body {
 
 .modal-content {
   background-color: white;
-  padding: 50px 100px;
+  padding: 20px 50px;
   text-align: center;
   position: relative;
   width: 20%;
@@ -108,12 +155,40 @@ body {
   flex-direction: column;
 }
 
+.inputUserName {
+  width: 120px;
+  height: 25px;
+  border: 2px solid #bdc3c7;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 20px;
+}
+
+.btns {
+  height: 70px;
+}
+
+.modalBtn-design {
+  all: unset;
+  margin: 10px 7px;
+  background-color: #2c3e50;
+  padding: 5px;
+  border-radius: 4px;
+  font-weight: bolder;
+  color: whitesmoke;
+}
+
+.modalBtn-design:hover {
+  padding: 7px;
+  transition: padding .3s;
+}
+
 .hidden {
   display: none;
 }
 
 .selected-user {
-  color: red;
+  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
 }
 
 .day-sun {
@@ -124,12 +199,12 @@ body {
   color: #778beb;
 }
 
-.date-num {
-  font-size: 20px;
+.haveEvent:hover {
+  border: 1px dashed #2c3e50;
 }
 
-.haveDate:hover {
-  border: 1px dashed #2c3e50;
+.date-num {
+  font-size: 20px;
 }
 
 .user {
@@ -143,7 +218,7 @@ body {
 }
 
 .user-name {
-  padding: 3px;
+  padding: 0px 4px;
 }
 
 .userColor-pink {
