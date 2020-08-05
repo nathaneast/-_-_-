@@ -409,7 +409,7 @@ const userProcess = {
     if (inputUSerName.value.length === 0 || inputUSerName.value.length > 5) {
       modalsProcess.warningMessage.userName();
     } else if (userList.childElementCount === 5) {
-      modalsProcess.warningMessage.usearCount();
+      modalsProcess.warningMessage.userCount();
     } else {
       userProcess.userListUp();
     }
